@@ -21,6 +21,18 @@ unsafe extern "C" {
     fn CGWindowListCopyWindowInfo(option: u32, relative_to_window: u32) -> CFTypeRef;
     fn CGSessionCopyCurrentDictionary() -> CFTypeRef;
     fn CGEventSourceSecondsSinceLastEventType(state: i32, event_type: u32) -> f64;
+    fn CGPreflightScreenCaptureAccess() -> bool;
+    fn CGRequestScreenCaptureAccess() -> bool;
+}
+
+/// Window titles need Screen Recording permission. If it's missing, macOS shows its prompt
+/// (once per app; after that the user enables it in System Settings).
+pub fn request_screen_recording() {
+    unsafe {
+        if !CGPreflightScreenCaptureAccess() {
+            CGRequestScreenCaptureAccess();
+        }
+    }
 }
 
 /// Takes ownership of a CF object returned by a `Copy` function. CF arrays and dictionaries are

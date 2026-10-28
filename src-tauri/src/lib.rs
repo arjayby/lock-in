@@ -32,6 +32,7 @@ pub fn run() {
             app.manage(shared.clone());
             enable_launch_at_login_once(app.handle(), &shared)?;
 
+            probe::request_screen_recording();
             tray::create(app.handle())?;
             service::start(app.handle().clone(), shared, tray::refresh);
 
