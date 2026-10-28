@@ -75,7 +75,7 @@ function Readout({ block, x }: Hover) {
   return (
     <div className={`readout ${x > 0.6 ? "left" : ""}`} style={{ left: `${x * 100}%` }}>
       <strong>{label}</strong>
-      {block.kind === "active" && block.title && <span className="readout-title">{block.title}</span>}
+      {block.kind === "active" && block.title && <span>{block.title}</span>}
       <span className="readout-time">
         {formatClock(block.start)} – {formatClock(block.end)} · {formatDuration(block.end - block.start)}
       </span>
