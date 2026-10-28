@@ -259,6 +259,53 @@ select {
   background: var(--on-primary);
 }
 
+/* Segmented control: a row of radio labels */
+
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-md);
+  background: var(--muted);
+}
+
+.segmented label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.segmented label:hover {
+  color: var(--foreground);
+}
+
+.segmented label:has(:checked) {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: var(--shadow-tab);
+}
+
+.segmented label:has(:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Page */
 
 .content {
@@ -759,6 +806,7 @@ select {
   .input,
   .switch,
   .switch-thumb,
+  .segmented label,
   .app-row,
   .app-row > svg {
     transition: none;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CaretUpDown } from "@phosphor-icons/react";
+import { CaretUpDown, Desktop, Moon, Sun } from "@phosphor-icons/react";
 import {
   AppInfo,
   Settings,
@@ -9,14 +9,22 @@ import {
   setLaunchAtLogin,
   setSkipTitles,
 } from "../api";
+import { ThemePref, getThemePref, setThemePref } from "../theme";
 import { AppIcon } from "./AppIcon";
 import { ErrorAlert } from "./ErrorAlert";
+
+const THEMES: [ThemePref, string, typeof Sun][] = [
+  ["system", "System", Desktop],
+  ["light", "Light", Sun],
+  ["dark", "Dark", Moon],
+];
 
 export function SettingsView() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [apps, setApps] = useState<AppInfo[]>([]);
   const [away, setAway] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [theme, setTheme] = useState(getThemePref);
 
   const load = () =>
     Promise.all([getSettings(), seenApps()])
@@ -47,6 +55,28 @@ export function SettingsView() {
   return (
     <>
       {error && <ErrorAlert message={error} />}
+
+      <section className="card">
+        <div className="card-header">
+          <h2 className="card-title">Appearance</h2>
+          <p className="card-description">System matches your macOS light or dark setting.</p>
+          <div className="segmented card-action" role="radiogroup" aria-label="Theme">
+            {THEMES.map(([value, label, Icon]) => (
+              <label key={value}>
+                <input
+                  type="radio"
+                  name="theme"
+                  value={value}
+                  checked={theme === value}
+                  onChange={() => (setThemePref(value), setTheme(value))}
+                />
+                <Icon size={16} />
+                {label}
+              </label>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="card">
         <div className="card-header">
