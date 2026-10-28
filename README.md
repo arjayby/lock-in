@@ -1,6 +1,9 @@
 # Lock In
 
-![The Lock In dashboard showing today's active and away time, a timeline of app usage and time per app](docs/screenshot.png)
+<p>
+  <img src="docs/screenshot-light.png" width="49%" alt="The Lock In dashboard in light mode, showing today's active and away time, a timeline of app usage and time per app">
+  <img src="docs/screenshot-dark.png" width="49%" alt="The same dashboard in dark mode">
+</p>
 
 A personal macOS menu-bar activity tracker built with Tauri 2, React and TypeScript: an
 ActivityWatch alternative. See [SPEC.md](SPEC.md) for what v1 does.
