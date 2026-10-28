@@ -90,3 +90,48 @@ impl Shared {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tracker::{Activity, Block, Kind, Op, Window};
+
+    fn block(app: &str, title: &str) -> Op {
+        let window = Window { app_id: app.into(), app_name: app.into(), title: title.into() };
+        Op::Start(Block { start: 0, end: 1000, activity: Activity { kind: Kind::Active, window: Some(window) } })
+    }
+
+    #[test]
+    fn adding_to_skip_list_erases_only_new_apps_titles() {
+        let mut db = Db::open_in_memory().unwrap();
+        db.apply(&[block("a", "secret")]).unwrap();
+        db.close_open();
+        db.apply(&[block("b", "kept")]).unwrap();
+        let shared = Shared::load(db).unwrap();
+
+        shared.set_skip_titles(vec!["a".into()]).unwrap();
+        let titles = |s: &Shared| -> Vec<Option<String>> {
+            s.db.lock().unwrap().blocks(0, 10_000).unwrap().into_iter().map(|b| b.title).collect()
+        };
+        assert_eq!(titles(&shared), vec![Some("".into()), Some("kept".into())]);
+        assert_eq!(shared.settings.lock().unwrap().skip_titles, vec!["a".to_string()]);
+
+        // Removing doesn't bring anything back.
+        shared.set_skip_titles(vec![]).unwrap();
+        assert_eq!(titles(&shared), vec![Some("".into()), Some("kept".into())]);
+    }
+
+    #[test]
+    fn pause_and_settings_persist() {
+        let shared = Shared::load(Db::open_in_memory().unwrap()).unwrap();
+        assert_eq!(shared.pause(), Pause::Off);
+        assert_eq!(shared.settings.lock().unwrap().skip_titles.len(), DEFAULT_SKIP_TITLES.len());
+
+        shared.set_pause(Pause::Until(42)).unwrap();
+        shared.set_away_minutes(10).unwrap();
+        let db = shared.db.into_inner().unwrap();
+        let reloaded = Shared::load(db).unwrap();
+        assert_eq!(reloaded.pause(), Pause::Until(42));
+        assert_eq!(reloaded.settings.lock().unwrap().away_minutes, 10);
+    }
+}

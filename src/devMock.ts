@@ -46,9 +46,30 @@ function sampleDay(date: string): DaySummary {
   return { from, to: from + 24 * 60 * MIN, activeMs, apps: [...totals.values()].sort((a, b) => b.ms - a.ms), blocks };
 }
 
+const settings = {
+  awayMinutes: 5,
+  skipTitles: [{ id: "com.1password.1password", name: "1Password" }],
+  launchAtLogin: true,
+};
+
 mockIPC((cmd, args) => {
   const a = args as Record<string, string>;
   switch (cmd) {
+    case "get_settings":
+      return settings;
+    case "seen_apps":
+      return APPS.map(([id, name]) => ({ id, name, path: null }));
+    case "set_away_minutes":
+      settings.awayMinutes = Number(a.minutes);
+      return;
+    case "set_launch_at_login":
+      settings.launchAtLogin = Boolean(a.enabled);
+      return;
+    case "set_skip_titles": {
+      const ids = a.appIds as unknown as string[];
+      settings.skipTitles = ids.map((id) => ({ id, name: APPS.find(([i]) => i === id)?.[1] ?? id }));
+      return;
+    }
     case "day_summary":
       return sampleDay(a.date);
     case "app_titles": {

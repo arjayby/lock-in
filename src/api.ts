@@ -34,3 +34,21 @@ export const daySummary = (date: string) => invoke<DaySummary>("day_summary", { 
 
 export const appTitles = (date: string, appId: string) =>
   invoke<TitleTotal[]>("app_titles", { date, appId });
+
+export interface AppInfo {
+  id: string;
+  name: string;
+  path: string | null;
+}
+
+export interface Settings {
+  awayMinutes: number;
+  skipTitles: { id: string; name: string }[];
+  launchAtLogin: boolean;
+}
+
+export const getSettings = () => invoke<Settings>("get_settings");
+export const seenApps = () => invoke<AppInfo[]>("seen_apps");
+export const setAwayMinutes = (minutes: number) => invoke<void>("set_away_minutes", { minutes });
+export const setSkipTitles = (appIds: string[]) => invoke<void>("set_skip_titles", { appIds });
+export const setLaunchAtLogin = (enabled: boolean) => invoke<void>("set_launch_at_login", { enabled });

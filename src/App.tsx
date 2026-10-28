@@ -2,12 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import { DaySummary, daySummary } from "./api";
 import { addDays, formatDuration, longDate, today } from "./format";
 import { AppList } from "./components/AppList";
+import { SettingsView } from "./components/SettingsView";
 import { Timeline } from "./components/Timeline";
 import "./styles.css";
 
 const REFRESH_MS = 10_000;
 
 export default function App() {
+  const [view, setView] = useState<"day" | "settings">("day");
   const [date, setDate] = useState(today);
   const [summary, setSummary] = useState<DaySummary | null>(null);
   const [version, setVersion] = useState(0);
@@ -38,8 +40,12 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <div className="date-nav">
-          <button className="icon-button" aria-label="Previous day" onClick={() => setDate(addDays(date, -1))}>
+        <div className="date-nav" hidden={view === "settings"}>
+          <button
+            className="icon-button"
+            aria-label="Previous day"
+            onClick={() => setDate(addDays(date, -1))}
+          >
             ‹
           </button>
           <input
@@ -62,29 +68,43 @@ export default function App() {
             </button>
           )}
         </div>
+        <div className="header-actions">
+          <button
+            className={view === "settings" ? "button primary" : "button"}
+            onClick={() => setView(view === "settings" ? "day" : "settings")}
+          >
+            {view === "settings" ? "Done" : "Settings"}
+          </button>
+        </div>
       </header>
 
-      <main className="content">
-        {error && <p className="error">{error}</p>}
+      {view === "settings" ? (
+        <main className="content">
+          <SettingsView />
+        </main>
+      ) : (
+        <main className="content">
+          {error && <p className="error">{error}</p>}
 
-        <section className="summary">
-          <h1>{isToday ? "Today" : longDate(date)}</h1>
-          <p className="total">
-            {summary ? formatDuration(summary.activeMs) : "–"}
-            <span className="muted"> active</span>
-          </p>
-        </section>
+          <section className="summary">
+            <h1>{isToday ? "Today" : longDate(date)}</h1>
+            <p className="total">
+              {summary ? formatDuration(summary.activeMs) : "–"}
+              <span className="muted"> active</span>
+            </p>
+          </section>
 
-        <section className="card">
-          <h2>Timeline</h2>
-          {summary && <Timeline from={summary.from} blocks={summary.blocks} />}
-        </section>
+          <section className="card">
+            <h2>Timeline</h2>
+            {summary && <Timeline from={summary.from} blocks={summary.blocks} />}
+          </section>
 
-        <section className="card">
-          <h2>Apps</h2>
-          {summary && <AppList date={date} apps={summary.apps} version={version} />}
-        </section>
-      </main>
+          <section className="card">
+            <h2>Apps</h2>
+            {summary && <AppList date={date} apps={summary.apps} version={version} />}
+          </section>
+        </main>
+      )}
     </div>
   );
 }
