@@ -1,7 +1,11 @@
-# Tauri + React + Typescript
+# Lock In
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+A personal macOS menu-bar activity tracker built with Tauri 2, React and TypeScript.
+See [SPEC.md](SPEC.md) for what v1 does.
 
-## Recommended IDE Setup
+## Develop
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+```bash
+pnpm install
+pnpm tauri dev
+```
