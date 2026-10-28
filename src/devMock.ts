@@ -11,6 +11,9 @@ const APPS: [string, string, string[]][] = [
   ["com.1password.1password", "1Password", [""]],
 ];
 
+// Icons extracted from the installed apps at the size the real `app_icon` command picks, keyed by path.
+const ICONS = import.meta.glob<string>("./dev-icons/*.png", { eager: true, import: "default" });
+
 function sampleDay(date: string): DaySummary {
   const [y, m, d] = date.split("-").map(Number);
   const from = new Date(y, m - 1, d).getTime();
@@ -72,6 +75,8 @@ mockIPC((cmd, args) => {
     }
     case "day_summary":
       return sampleDay(a.date);
+    case "app_icon":
+      return ICONS[`./dev-icons/${a.appId}.png`] ?? null;
     case "app_titles": {
       const ms = new Map<string, number>();
       for (const b of sampleDay(a.date).blocks) {
