@@ -1,5 +1,7 @@
 # Lock In
 
+![The Lock In dashboard showing today's active and away time, a timeline of app usage and time per app](docs/screenshot.png)
+
 A personal macOS menu-bar activity tracker built with Tauri 2, React and TypeScript: an
 ActivityWatch alternative. See [SPEC.md](SPEC.md) for what v1 does.
 
