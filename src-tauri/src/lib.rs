@@ -1,3 +1,4 @@
+mod commands;
 mod db;
 mod probe;
 mod service;
@@ -37,6 +38,7 @@ pub fn run() {
                 api.prevent_close();
             }
         })
+        .invoke_handler(tauri::generate_handler![commands::day_summary, commands::app_titles])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
