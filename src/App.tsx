@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { DaySummary, daySummary } from "./api";
-import { addDays, formatDuration, longDate, today } from "./format";
+import { addDays, appColors, formatDuration, longDate, today } from "./format";
 import { AppList } from "./components/AppList";
 import { ExportDialog } from "./components/ExportDialog";
 import { SettingsView } from "./components/SettingsView";
@@ -38,6 +38,7 @@ export default function App() {
   }, [load]);
 
   const isToday = date === today();
+  const color = appColors(summary?.apps ?? []);
 
   return (
     <div className="app">
@@ -103,12 +104,12 @@ export default function App() {
 
           <section className="card">
             <h2>Timeline</h2>
-            {summary && <Timeline from={summary.from} blocks={summary.blocks} />}
+            {summary && <Timeline from={summary.from} blocks={summary.blocks} color={color} />}
           </section>
 
           <section className="card">
             <h2>Apps</h2>
-            {summary && <AppList date={date} apps={summary.apps} version={version} />}
+            {summary && <AppList date={date} apps={summary.apps} version={version} color={color} />}
           </section>
         </main>
       )}

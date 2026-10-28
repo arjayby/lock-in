@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { appIcon } from "../api";
-import { appColor } from "../format";
 
 // One request per app for the life of the window.
 const cache = new Map<string, Promise<string | null>>();
@@ -27,7 +26,7 @@ export function AppIcon({ appId, name }: { appId: string; name: string }) {
 
   if (src) return <img className="app-icon" src={src} alt="" />;
   return (
-    <span className="app-icon initial" style={{ background: appColor(appId) }} aria-hidden>
+    <span className="app-icon initial" aria-hidden>
       {name.charAt(0).toUpperCase()}
     </span>
   );

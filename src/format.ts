@@ -1,3 +1,5 @@
+import type { AppTotal } from "./api";
+
 /** `4h 12m`, `12m`, or `<1m`. */
 export function formatDuration(ms: number): string {
   const minutes = Math.floor(ms / 60_000);
@@ -34,9 +36,10 @@ export function longDate(date: string): string {
   });
 }
 
-/** A stable color per app, so the list and the timeline match. */
-export function appColor(appId: string): string {
-  let hash = 0;
-  for (const ch of appId) hash = (hash * 31 + ch.charCodeAt(0)) | 0;
-  return `hsl(${Math.abs(hash) % 360} 62% 56%)`;
+const CHART_SLOTS = 5;
+
+/** Chart colours by rank: the day's top five apps keep their own slot, the rest share Other. */
+export function appColors(apps: AppTotal[]): (appId: string) => string {
+  const slots = new Map(apps.slice(0, CHART_SLOTS).map((a, i) => [a.appId, `var(--chart-${i + 1})`]));
+  return (appId) => slots.get(appId) ?? "var(--chart-other)";
 }

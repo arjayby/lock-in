@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AppTotal, TitleTotal, appTitles } from "../api";
-import { appColor, formatDuration } from "../format";
+import { formatDuration } from "../format";
 import { AppIcon } from "./AppIcon";
 
 interface Props {
@@ -8,9 +8,10 @@ interface Props {
   apps: AppTotal[];
   /** Changes on every refresh, so open title lists refresh too. */
   version: number;
+  color: (appId: string) => string;
 }
 
-export function AppList({ date, apps, version }: Props) {
+export function AppList({ date, apps, version, color }: Props) {
   const [openApp, setOpenApp] = useState<string | null>(null);
 
   if (apps.length === 0) return <p className="empty">No app activity on this day.</p>;
@@ -29,7 +30,7 @@ export function AppList({ date, apps, version }: Props) {
             <span className="app-name">{app.name}</span>
             <span className="app-bar">
               <span
-                style={{ width: `${(app.ms / max) * 100}%`, background: appColor(app.appId) }}
+                style={{ width: `${(app.ms / max) * 100}%`, background: color(app.appId) }}
               />
             </span>
             <span className="app-time">{formatDuration(app.ms)}</span>

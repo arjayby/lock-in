@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { BlockRow } from "../api";
-import { appColor, formatClock, formatDuration } from "../format";
+import { formatClock, formatDuration } from "../format";
 
 const HOUR = 3_600_000;
 
 interface Props {
   from: number;
   blocks: BlockRow[];
+  color: (appId: string) => string;
 }
 
 interface Hover {
@@ -15,7 +16,7 @@ interface Hover {
   x: number;
 }
 
-export function Timeline({ from, blocks }: Props) {
+export function Timeline({ from, blocks, color }: Props) {
   const [hover, setHover] = useState<Hover | null>(null);
 
   if (blocks.length === 0) return <p className="empty">Nothing recorded on this day.</p>;
@@ -49,7 +50,7 @@ export function Timeline({ from, blocks }: Props) {
             style={{
               left: `${pct(b.start)}%`,
               width: `${pct(b.end) - pct(b.start)}%`,
-              background: b.kind === "active" && b.appId ? appColor(b.appId) : undefined,
+              background: b.kind === "active" && b.appId ? color(b.appId) : undefined,
             }}
           />
         ))}

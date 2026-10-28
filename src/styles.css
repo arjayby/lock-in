@@ -275,7 +275,8 @@ input {
   display: grid;
   place-items: center;
   border-radius: 6px;
-  color: #fff;
+  background: var(--track);
+  color: var(--text);
   font-size: 12px;
   font-weight: 600;
 }
