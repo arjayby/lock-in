@@ -52,3 +52,7 @@ export const seenApps = () => invoke<AppInfo[]>("seen_apps");
 export const setAwayMinutes = (minutes: number) => invoke<void>("set_away_minutes", { minutes });
 export const setSkipTitles = (appIds: string[]) => invoke<void>("set_skip_titles", { appIds });
 export const setLaunchAtLogin = (enabled: boolean) => invoke<void>("set_launch_at_login", { enabled });
+
+/** Writes a CSV of blocks from the start of `from` to the end of `to`. Resolves to the row count. */
+export const exportCsv = (from: string, to: string, path: string) =>
+  invoke<number>("export_csv", { from, to, path });

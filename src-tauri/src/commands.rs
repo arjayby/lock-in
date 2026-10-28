@@ -9,7 +9,7 @@ use tauri_plugin_autostart::ManagerExt;
 
 use crate::db::{AppInfo, AppTotal, BlockRow, TitleTotal};
 use crate::state::{DEFAULT_SKIP_TITLES, Shared};
-use crate::time;
+use crate::{export, time};
 
 type Result<T> = std::result::Result<T, String>;
 
@@ -105,4 +105,17 @@ pub fn set_skip_titles(shared: State<Arc<Shared>>, app_ids: Vec<String>) -> Resu
 pub fn set_launch_at_login(app: AppHandle, enabled: bool) -> Result<()> {
     let launcher = app.autolaunch();
     if enabled { launcher.enable() } else { launcher.disable() }.map_err(|e| e.to_string())
+}
+
+/// Writes blocks from the start of `from` to the end of `to` as CSV. Returns the row count.
+#[tauri::command]
+pub fn export_csv(shared: State<Arc<Shared>>, from: String, to: String, path: String) -> Result<usize> {
+    let (start, _) = day(&from)?;
+    let (_, end) = day(&to)?;
+    if end <= start {
+        return Err("The end date is before the start date".into());
+    }
+    let blocks = shared.db.lock().unwrap().blocks(start, end).map_err(|e| e.to_string())?;
+    std::fs::write(&path, export::to_csv(&blocks)).map_err(|e| e.to_string())?;
+    Ok(blocks.len())
 }

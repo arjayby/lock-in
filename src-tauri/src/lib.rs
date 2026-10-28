@@ -1,5 +1,6 @@
 mod commands;
 mod db;
+mod export;
 mod probe;
 mod service;
 mod state;
@@ -19,6 +20,7 @@ use state::Shared;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .setup(|app| {
             #[cfg(target_os = "macos")]
@@ -53,6 +55,7 @@ pub fn run() {
             commands::set_away_minutes,
             commands::set_skip_titles,
             commands::set_launch_at_login,
+            commands::export_csv,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

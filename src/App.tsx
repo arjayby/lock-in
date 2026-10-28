@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DaySummary, daySummary } from "./api";
 import { addDays, formatDuration, longDate, today } from "./format";
 import { AppList } from "./components/AppList";
+import { ExportDialog } from "./components/ExportDialog";
 import { SettingsView } from "./components/SettingsView";
 import { Timeline } from "./components/Timeline";
 import "./styles.css";
@@ -14,6 +15,7 @@ export default function App() {
   const [summary, setSummary] = useState<DaySummary | null>(null);
   const [version, setVersion] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const load = useCallback(() => {
     daySummary(date)
@@ -69,6 +71,11 @@ export default function App() {
           )}
         </div>
         <div className="header-actions">
+          {view === "day" && (
+            <button className="button" onClick={() => setExporting(true)}>
+              Export
+            </button>
+          )}
           <button
             className={view === "settings" ? "button primary" : "button"}
             onClick={() => setView(view === "settings" ? "day" : "settings")}
@@ -105,6 +112,7 @@ export default function App() {
           </section>
         </main>
       )}
+      {exporting && <ExportDialog date={date} onClose={() => setExporting(false)} />}
     </div>
   );
 }
