@@ -29,6 +29,10 @@ pub fn run() {
 
             tray::create(app.handle())?;
             service::start(app.handle().clone(), shared, tray::refresh);
+
+            // Dev builds open the dashboard right away instead of waiting for the menu.
+            #[cfg(debug_assertions)]
+            tray::show_dashboard(app.handle());
             Ok(())
         })
         .on_window_event(|window, event| {

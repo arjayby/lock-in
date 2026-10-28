@@ -1,51 +1,90 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useCallback, useEffect, useState } from "react";
+import { DaySummary, daySummary } from "./api";
+import { addDays, formatDuration, longDate, today } from "./format";
+import { AppList } from "./components/AppList";
+import { Timeline } from "./components/Timeline";
+import "./styles.css";
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+const REFRESH_MS = 10_000;
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+export default function App() {
+  const [date, setDate] = useState(today);
+  const [summary, setSummary] = useState<DaySummary | null>(null);
+  const [version, setVersion] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(() => {
+    daySummary(date)
+      .then((s) => {
+        setSummary(s);
+        setVersion((v) => v + 1);
+        setError(null);
+      })
+      .catch((e) => setError(String(e)));
+  }, [date]);
+
+  useEffect(() => {
+    load();
+    const timer = setInterval(load, REFRESH_MS);
+    window.addEventListener("focus", load);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", load);
+    };
+  }, [load]);
+
+  const isToday = date === today();
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    <div className="app">
+      <header className="header">
+        <div className="date-nav">
+          <button className="icon-button" aria-label="Previous day" onClick={() => setDate(addDays(date, -1))}>
+            ‹
+          </button>
+          <input
+            type="date"
+            value={date}
+            max={today()}
+            onChange={(e) => e.target.value && setDate(e.target.value)}
+          />
+          <button
+            className="icon-button"
+            aria-label="Next day"
+            disabled={isToday}
+            onClick={() => setDate(addDays(date, 1))}
+          >
+            ›
+          </button>
+          {!isToday && (
+            <button className="button" onClick={() => setDate(today())}>
+              Today
+            </button>
+          )}
+        </div>
+      </header>
 
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
+      <main className="content">
+        {error && <p className="error">{error}</p>}
 
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+        <section className="summary">
+          <h1>{isToday ? "Today" : longDate(date)}</h1>
+          <p className="total">
+            {summary ? formatDuration(summary.activeMs) : "–"}
+            <span className="muted"> active</span>
+          </p>
+        </section>
+
+        <section className="card">
+          <h2>Timeline</h2>
+          {summary && <Timeline from={summary.from} blocks={summary.blocks} />}
+        </section>
+
+        <section className="card">
+          <h2>Apps</h2>
+          {summary && <AppList date={date} apps={summary.apps} version={version} />}
+        </section>
+      </main>
+    </div>
   );
 }
-
-export default App;
