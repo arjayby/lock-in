@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CaretRight } from "@phosphor-icons/react";
 import { AppTotal, TitleTotal, appTitles } from "../api";
 import { formatDuration } from "../format";
 import { AppIcon } from "./AppIcon";
@@ -34,6 +35,7 @@ export function AppList({ date, apps, version, color }: Props) {
               />
             </span>
             <span className="app-time">{formatDuration(app.ms)}</span>
+            <CaretRight size={16} />
           </button>
           {openApp === app.appId && <Titles date={date} appId={app.appId} version={version} />}
         </li>

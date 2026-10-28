@@ -54,7 +54,7 @@ export function Timeline({ from, blocks, color }: Props) {
             }}
           />
         ))}
-        {hover && <Tooltip {...hover} />}
+        {hover && <Readout {...hover} />}
       </div>
       <div className="hours">
         {hours.map((h, i) =>
@@ -69,14 +69,14 @@ export function Timeline({ from, blocks, color }: Props) {
   );
 }
 
-function Tooltip({ block, x }: Hover) {
+function Readout({ block, x }: Hover) {
   const label =
     block.kind === "active" ? (block.appName ?? block.appId) : block.kind === "away" ? "Away" : "Paused";
   return (
-    <div className={`tooltip ${x > 0.6 ? "left" : ""}`} style={{ left: `${x * 100}%` }}>
+    <div className={`readout ${x > 0.6 ? "left" : ""}`} style={{ left: `${x * 100}%` }}>
       <strong>{label}</strong>
-      {block.kind === "active" && block.title && <span className="tooltip-title">{block.title}</span>}
-      <span className="muted">
+      {block.kind === "active" && block.title && <span className="readout-title">{block.title}</span>}
+      <span className="readout-time">
         {formatClock(block.start)} – {formatClock(block.end)} · {formatDuration(block.end - block.start)}
       </span>
     </div>

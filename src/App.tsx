@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
+import { CalendarBlank, CaretLeft, CaretRight, DownloadSimple, Gear } from "@phosphor-icons/react";
 import { DaySummary, daySummary } from "./api";
 import { addDays, appColors, formatDuration, longDate, today } from "./format";
 import { AppList } from "./components/AppList";
+import { ErrorAlert } from "./components/ErrorAlert";
 import { ExportDialog } from "./components/ExportDialog";
 import { SettingsView } from "./components/SettingsView";
 import { Timeline } from "./components/Timeline";
@@ -39,50 +41,84 @@ export default function App() {
 
   const isToday = date === today();
   const color = appColors(summary?.apps ?? []);
+  const awayMs = (summary?.blocks ?? [])
+    .filter((b) => b.kind === "away")
+    .reduce((ms, b) => ms + b.end - b.start, 0);
 
   return (
     <div className="app">
-      <header className="header">
-        <div className="date-nav" hidden={view === "settings"}>
-          <button
-            className="icon-button"
-            aria-label="Previous day"
-            onClick={() => setDate(addDays(date, -1))}
-          >
-            ‹
-          </button>
-          <input
-            type="date"
-            value={date}
-            max={today()}
-            onChange={(e) => e.target.value && setDate(e.target.value)}
-          />
-          <button
-            className="icon-button"
-            aria-label="Next day"
-            disabled={isToday}
-            onClick={() => setDate(addDays(date, 1))}
-          >
-            ›
-          </button>
-          {!isToday && (
-            <button className="button" onClick={() => setDate(today())}>
-              Today
+      <header className="toolbar">
+        {view === "settings" ? (
+          <h1 className="toolbar-title">Settings</h1>
+        ) : (
+          <div className="date-nav">
+            <button
+              className="button"
+              data-variant="outline"
+              data-size="icon-sm"
+              aria-label="Previous day"
+              title="Previous day"
+              onClick={() => setDate(addDays(date, -1))}
+            >
+              <CaretLeft size={16} />
             </button>
-          )}
-        </div>
-        <div className="header-actions">
-          {view === "day" && (
-            <button className="button" onClick={() => setExporting(true)}>
-              Export
+            <label className="date-field">
+              <CalendarBlank size={16} />
+              <input
+                className="input"
+                type="date"
+                aria-label="Day"
+                value={date}
+                max={today()}
+                onChange={(e) => e.target.value && setDate(e.target.value)}
+              />
+            </label>
+            <button
+              className="button"
+              data-variant="outline"
+              data-size="icon-sm"
+              aria-label="Next day"
+              title="Next day"
+              disabled={isToday}
+              onClick={() => setDate(addDays(date, 1))}
+            >
+              <CaretRight size={16} />
             </button>
+            {!isToday && (
+              <button className="button" data-variant="ghost" data-size="sm" onClick={() => setDate(today())}>
+                Today
+              </button>
+            )}
+          </div>
+        )}
+        <div className="toolbar-actions">
+          {view === "settings" ? (
+            <button className="button" data-size="sm" onClick={() => setView("day")}>
+              Done
+            </button>
+          ) : (
+            <>
+              <button
+                className="button"
+                data-variant="outline"
+                data-size="sm"
+                onClick={() => setExporting(true)}
+              >
+                <DownloadSimple size={16} />
+                Export CSV
+              </button>
+              <button
+                className="button"
+                data-variant="ghost"
+                data-size="icon-sm"
+                aria-label="Settings"
+                title="Settings"
+                onClick={() => setView("settings")}
+              >
+                <Gear size={16} />
+              </button>
+            </>
           )}
-          <button
-            className={view === "settings" ? "button primary" : "button"}
-            onClick={() => setView(view === "settings" ? "day" : "settings")}
-          >
-            {view === "settings" ? "Done" : "Settings"}
-          </button>
         </div>
       </header>
 
@@ -92,28 +128,56 @@ export default function App() {
         </main>
       ) : (
         <main className="content">
-          {error && <p className="error">{error}</p>}
+          {error && <ErrorAlert message={error} />}
 
-          <section className="summary">
-            <h1>{isToday ? "Today" : longDate(date)}</h1>
-            <p className="total">
-              {summary ? formatDuration(summary.activeMs) : "–"}
-              <span className="muted"> active</span>
-            </p>
+          <section className="page-head">
+            {isToday && <p className="eyebrow">{longDate(date)}</p>}
+            <h1 className="page-title">{isToday ? "Today" : longDate(date)}</h1>
+          </section>
+
+          <section className="kpis">
+            <Kpi label="Active" value={summary ? formatDuration(summary.activeMs) : "–"} />
+            <Kpi label="Away" value={summary ? formatDuration(awayMs) : "–"} />
+            <Kpi label="Apps used" value={summary ? String(summary.apps.length) : "–"} />
           </section>
 
           <section className="card">
-            <h2>Timeline</h2>
+            <div className="card-header">
+              <h2 className="card-title">Timeline</h2>
+              <p className="card-description">Hover a block to see the app and window.</p>
+              <ul className="legend card-action">
+                <li>
+                  <span className="swatch away" />
+                  Away
+                </li>
+                <li>
+                  <span className="swatch paused" />
+                  Paused
+                </li>
+              </ul>
+            </div>
             {summary && <Timeline from={summary.from} blocks={summary.blocks} color={color} />}
           </section>
 
           <section className="card">
-            <h2>Apps</h2>
+            <div className="card-header">
+              <h2 className="card-title">Apps</h2>
+              <p className="card-description">Select an app to see time per window title.</p>
+            </div>
             {summary && <AppList date={date} apps={summary.apps} version={version} color={color} />}
           </section>
         </main>
       )}
       {exporting && <ExportDialog date={date} onClose={() => setExporting(false)} />}
+    </div>
+  );
+}
+
+function Kpi({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="card" data-size="sm">
+      <p className="eyebrow">{label}</p>
+      <p className="metric">{value}</p>
     </div>
   );
 }
