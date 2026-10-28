@@ -77,8 +77,9 @@ function Readout({ block, x }: Hover) {
       <strong>{label}</strong>
       {block.kind === "active" && block.title && <span>{block.title}</span>}
       <span className="readout-time">
-        {formatClock(block.start)} – {formatClock(block.end)} · {formatDuration(block.end - block.start)}
+        {formatClock(block.start)} – {formatClock(block.end)}
       </span>
+      <span className="readout-time">{formatDuration(block.end - block.start)}</span>
     </div>
   );
 }
