@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import "./tokens.css";
 import App from "./App";
 
 // Outside Tauri (plain `pnpm dev` in a browser), serve sample data instead of Rust commands.
