@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 
+use base64::prelude::*;
 use chrono::NaiveDate;
 use serde::Serialize;
 use tauri::{AppHandle, State};
@@ -9,7 +10,7 @@ use tauri_plugin_autostart::ManagerExt;
 
 use crate::db::{AppInfo, AppTotal, BlockRow, TitleTotal};
 use crate::state::{DEFAULT_SKIP_TITLES, Shared};
-use crate::{export, time};
+use crate::{export, icons, time};
 
 type Result<T> = std::result::Result<T, String>;
 
@@ -118,4 +119,20 @@ pub fn export_csv(shared: State<Arc<Shared>>, from: String, to: String, path: St
     let blocks = shared.db.lock().unwrap().blocks(start, end).map_err(|e| e.to_string())?;
     std::fs::write(&path, export::to_csv(&blocks)).map_err(|e| e.to_string())?;
     Ok(blocks.len())
+}
+
+/// An app's icon as a PNG data URL, or `None` if it has none. Extracted once, then cached.
+#[tauri::command]
+pub fn app_icon(shared: State<Arc<Shared>>, app_id: String) -> Result<Option<String>> {
+    let db = shared.db.lock().unwrap();
+    let png = match db.icon(&app_id).map_err(|e| e.to_string())? {
+        Some(cached) => cached,
+        None => {
+            let path = db.apps().map_err(|e| e.to_string())?.into_iter().find(|a| a.id == app_id).and_then(|a| a.path);
+            let png = path.and_then(|p| icons::app_icon_png(&p));
+            db.set_icon(&app_id, png.as_deref()).map_err(|e| e.to_string())?;
+            png
+        }
+    };
+    Ok(png.map(|png| format!("data:image/png;base64,{}", BASE64_STANDARD.encode(png))))
 }

@@ -1,6 +1,7 @@
 mod commands;
 mod db;
 mod export;
+mod icons;
 mod probe;
 mod service;
 mod state;
@@ -56,6 +57,7 @@ pub fn run() {
             commands::set_skip_titles,
             commands::set_launch_at_login,
             commands::export_csv,
+            commands::app_icon,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

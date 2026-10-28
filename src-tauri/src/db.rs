@@ -116,7 +116,8 @@ impl Db {
         tx.commit()
     }
 
-    /// Forgets the open block so the next `Start` doesn't touch it.
+    /// Forgets the open block, as if the tracker had restarted.
+    #[cfg(test)]
     pub fn close_open(&mut self) {
         self.open_id = None;
     }
