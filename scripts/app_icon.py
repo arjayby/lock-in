@@ -1,24 +1,19 @@
-# 1024px app icon: blue rounded square with a white padlock, following the macOS icon grid.
+# 1024px app icon: blue rounded square with a white bullseye, following the macOS icon grid.
 import sys, zlib, struct, math
 S, SS = 1024, 2
 N = S * SS
-def lock(x, y):
-    bx0, bx1, by0, by1, r = 0.18, 0.82, 0.44, 0.92, 0.10
-    cx = min(max(x, bx0 + r), bx1 - r); cy = min(max(y, by0 + r), by1 - r)
-    body = bx0 <= x <= bx1 and by0 <= y <= by1 and (x - cx) ** 2 + (y - cy) ** 2 <= r * r
-    hole = (x - 0.5) ** 2 + (y - 0.63) ** 2 <= 0.065 ** 2 or (abs(x - 0.5) <= 0.03 and 0.63 <= y <= 0.78)
-    d = math.hypot(x - 0.5, y - 0.30)
-    ring = 0.17 <= d <= 0.25 and y <= 0.30
-    legs = (0.25 <= x <= 0.33 or 0.67 <= x <= 0.75) and 0.30 <= y <= 0.46
-    return (body and not hole) or ring or legs
+def target(x, y):
+    # bullseye from shapes.gallery: rings at 96..128 and 40..72 plus a 16 dot, on a 128 radius
+    d = math.hypot(x - 0.5, y - 0.5) * 256
+    return 96 <= d <= 128 or 40 <= d <= 72 or d <= 16
 def pixel(x, y):
     # 824px tile centered in 1024 with 185px corners
     m, r = 100 / 1024, 185 / 1024
     if not (m <= x <= 1 - m and m <= y <= 1 - m): return None
     cx = min(max(x, m + r), 1 - m - r); cy = min(max(y, m + r), 1 - m - r)
     if (x - cx) ** 2 + (y - cy) ** 2 > r * r: return None
-    lx, ly = (x - 0.25) / 0.5, (y - 0.24) / 0.5
-    if 0 <= lx <= 1 and 0 <= ly <= 1 and lock(lx, ly): return (255, 255, 255)
+    lx, ly = (x - 0.27) / 0.46, (y - 0.27) / 0.46
+    if 0 <= lx <= 1 and 0 <= ly <= 1 and target(lx, ly): return (255, 255, 255)
     t = (y - m) / (1 - 2 * m)  # vertical gradient
     return (round(66 - 20 * t), round(133 - 40 * t), round(244 - 30 * t))
 rows = []
