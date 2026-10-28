@@ -104,11 +104,6 @@ impl Tracker {
         self.skip_titles = app_ids;
     }
 
-    /// Closes the open block, e.g. before quitting. Its end is already up to date.
-    pub fn close(&mut self) {
-        self.current = None;
-    }
-
     pub fn observe(&mut self, s: &Sample) -> Vec<Op> {
         let mut ops = Vec::new();
 
